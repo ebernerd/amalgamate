@@ -41,7 +41,7 @@ def handle_input_event(arg1):
     print('new button input event on websocket side:')
     print(arg1.value)
     if (connection_count > 0):
-        emit('input_event', arg1.value)
+        emit('input_event', arg1.value, broadcast=True)
 
 def start_server():
     socketio.run(app)
