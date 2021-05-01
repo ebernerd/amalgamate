@@ -1,26 +1,17 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import "./App.scss"
+import { useContext } from "react"
+import { VideoModeContext } from "./contexts/VideoMode"
+import { VideoModeSelector } from "./components/VideoModeSelector"
+import { VideoController } from "./components/VideoController"
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+const App = () => {
+	//	Show the video mode selector if there is not one selected
+	const [videoMode] = useContext(VideoModeContext)
+	return videoMode === undefined ? (
+		<VideoModeSelector />
+	) : (
+		<VideoController videoMode={videoMode} />
+	)
 }
 
-export default App;
+export default App
