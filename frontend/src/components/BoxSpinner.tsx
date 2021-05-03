@@ -22,6 +22,7 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 	const resolvedWidth = width ?? 1920
 
 	const boxes: ReactNode[] = useMemo(() => {
+		console.log("TEST")
 		let arr = []
 		for (let i = 0; i < props.boxCount; i++) {
 			arr.push(
