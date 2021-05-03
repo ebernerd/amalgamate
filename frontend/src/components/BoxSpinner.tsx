@@ -51,13 +51,14 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 		return () => clearInterval(timerId)
 	})
 	const startSpinner = useCallback(() => {
-		setTargetX(targetX + getRandInt(5, Math.min(12, props.boxCount)))
-		setSpinning(true)
-	}, [targetX, props.boxCount])
+		if (!spinning) {
+			setTargetX(targetX + getRandInt(5, Math.min(12, props.boxCount)))
+			setSpinning(true)
+		}
+	}, [targetX, props.boxCount, spinning])
 
 	const [debouncedReadyForSpin] = useDebounce(buttonPressed, 500)
 	useEffect(() => {
-		console.log(debouncedReadyForSpin)
 		if (debouncedReadyForSpin) {
 			setButtonPressed(false)
 			startSpinner()
@@ -72,7 +73,7 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 			console.log("Websocket connection established.")
 		)
 		socket.on("input_event", (num: number) => {
-			if (NUM_TO_VIDEO_MODE[num] !== props.videoMode) {
+			if (NUM_TO_VIDEO_MODE[num - 1] !== props.videoMode) {
 				return
 			}
 			setButtonPressed(true)
@@ -121,15 +122,6 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 					volume={0}
 				/>
 			</div>
-
-			<button
-				onClick={() => {
-					startSpinner()
-				}}
-				style={{ position: "fixed", top: 500 }}
-			>
-				Spin
-			</button>
 		</div>
 	)
 }
