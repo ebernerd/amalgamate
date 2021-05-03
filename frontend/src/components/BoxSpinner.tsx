@@ -8,6 +8,7 @@ import { useDebounce } from "use-debounce"
 export interface BoxSpinnerProps {
 	boxCount: number
 	videoMode: PureVideoMode
+	isPi: boolean
 }
 
 const NUM_TO_VIDEO_MODE: PureVideoMode[] = ["head", "torso", "leg"]
@@ -66,9 +67,12 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 	}, [debouncedReadyForSpin, startSpinner])
 
 	useEffect(() => {
-		const socket = io(`ws://${process.env.REACT_APP_WS}:5000`, {
-			withCredentials: false,
-		})
+		const socket = io(
+			`ws://${props.isPi ? "127.0.0.1" : process.env.REACT_APP_WS}:5000`,
+			{
+				withCredentials: false,
+			}
+		)
 		socket.on("connect", () =>
 			console.log("Websocket connection established.")
 		)
@@ -78,7 +82,7 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 			}
 			setButtonPressed(true)
 		})
-	}, [props.videoMode])
+	}, [props.videoMode, props.isPi])
 
 	return (
 		<div>
