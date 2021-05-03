@@ -1,9 +1,15 @@
 import "./App.scss"
 import { useContext } from "react"
-import { VideoModeContext } from "./contexts/VideoMode"
+import { PureVideoMode, VideoModeContext } from "./contexts/VideoMode"
 import { VideoModeSelector } from "./components/VideoModeSelector"
 import { VideoController } from "./components/VideoController"
 import { BoxSpinner } from "./components/BoxSpinner"
+
+const VIDEO_COUNTS: Record<PureVideoMode, number> = {
+	head: 24,
+	torso: 41,
+	leg: 37,
+}
 
 const App = () => {
 	//	Show the video mode selector if there is not one selected
@@ -11,7 +17,7 @@ const App = () => {
 	return videoMode === undefined ? (
 		<VideoModeSelector />
 	) : (
-		<BoxSpinner boxCount={5} videoMode={videoMode} />
+		<BoxSpinner boxCount={VIDEO_COUNTS[videoMode]} videoMode={videoMode} />
 	)
 }
 
