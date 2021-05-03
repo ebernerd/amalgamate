@@ -28,7 +28,9 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 			arr.push(
 				<img
 					alt="Spinner"
-					src={`videos/${props.videoMode}/frames/${i + 1}.png`}
+					src={`https://storage.googleapis.com/amalgamate-videos/${
+						props.videoMode
+					}/frames/${i + 1}.png`}
 				/>
 			)
 		}
@@ -95,9 +97,9 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 					</div>
 				))}
 				<ReactPlayer
-					url={`videos/${props.videoMode}/${
-						(targetX % props.boxCount) + 1
-					}.mp4`}
+					url={`https://storage.googleapis.com/amalgamate-videos/${
+						props.videoMode
+					}/${(targetX % props.boxCount) + 1}.mp4`}
 					playing={true}
 					width="100vw"
 					height="100vh"
