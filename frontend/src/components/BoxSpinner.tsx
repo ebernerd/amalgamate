@@ -17,7 +17,6 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 
 	const [targetX, setTargetX] = useState<number>(0)
 	const [spinning, setSpinning] = useState<boolean>(false)
-	const [connectText, setConnectText] = useState<string>("Not connected.")
 	const [buttonPressed, setButtonPressed] = useState<boolean>(false)
 	const resolvedWidth = width ?? 1920
 
@@ -36,7 +35,7 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 		}
 
 		return arr
-	}, [])
+	}, [props.boxCount, props.videoMode])
 
 	const tickInterval = 200
 	useEffect(() => {
@@ -65,11 +64,23 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 		}
 	}, [debouncedReadyForSpin, startSpinner])
 
-	useEffect(() => {}, [props.videoMode])
+	useEffect(() => {
+		const socket = io(`ws://${process.env.REACT_APP_WS}:5000`, {
+			withCredentials: false,
+		})
+		socket.on("connect", () =>
+			console.log("Websocket connection established.")
+		)
+		socket.on("input_event", (num: number) => {
+			if (NUM_TO_VIDEO_MODE[num] !== props.videoMode) {
+				return
+			}
+			setButtonPressed(true)
+		})
+	}, [props.videoMode])
 
 	return (
 		<div>
-			<p>{connectText}</p>
 			<div>
 				{boxes.map((box, i) => (
 					<div
