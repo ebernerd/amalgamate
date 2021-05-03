@@ -1,0 +1,20 @@
+{
+  "files": {
+    "main.css": "/amalgamate/static/css/main.908fd672.chunk.css",
+    "main.js": "/amalgamate/static/js/main.33d0ba44.chunk.js",
+    "main.js.map": "/amalgamate/static/js/main.33d0ba44.chunk.js.map",
+    "runtime-main.js": "/amalgamate/static/js/runtime-main.6b634dad.js",
+    "runtime-main.js.map": "/amalgamate/static/js/runtime-main.6b634dad.js.map",
+    "static/js/2.19899a13.chunk.js": "/amalgamate/static/js/2.19899a13.chunk.js",
+    "static/js/2.19899a13.chunk.js.map": "/amalgamate/static/js/2.19899a13.chunk.js.map",
+    "index.html": "/amalgamate/index.html",
+    "static/css/main.908fd672.chunk.css.map": "/amalgamate/static/css/main.908fd672.chunk.css.map",
+    "static/js/2.19899a13.chunk.js.LICENSE.txt": "/amalgamate/static/js/2.19899a13.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.6b634dad.js",
+    "static/js/2.19899a13.chunk.js",
+    "static/css/main.908fd672.chunk.css",
+    "static/js/main.33d0ba44.chunk.js"
+  ]
+}
