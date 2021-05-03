@@ -85,7 +85,7 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 	}, [props.videoMode, props.isPi])
 
 	return (
-		<div>
+		<div className="videoHolder">
 			<div>
 				{boxes.map((box, i) => (
 					<div
