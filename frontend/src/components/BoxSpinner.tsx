@@ -1,39 +1,23 @@
-import React, {
-	useEffect,
-	useMemo,
-	useState,
-	ReactNode,
-	useDebugValue,
-	useCallback,
-} from "react"
+import { useEffect, useMemo, useState, ReactNode, useCallback } from "react"
 import { getRandInt } from "../utils/getRandInt"
-import Tween from "rc-tween-one"
 import { useWindowSize } from "../hooks/useWindowSize"
 import ReactPlayer from "react-player"
 import { PureVideoMode } from "../contexts/VideoMode"
 import io from "socket.io-client"
 import { useDebounce } from "use-debounce"
-import { Socket } from "dgram"
 export interface BoxSpinnerProps {
 	boxCount: number
 	videoMode: PureVideoMode
 }
 
-const NUM_TO_VIDEO_MODE: Record<number, PureVideoMode> = {
-	[1]: "head",
-	[2]: "torso",
-	[3]: "leg",
-}
-
-const COLORS = ["#03A9F4", "#4CAF50", "#f44336"]
+const NUM_TO_VIDEO_MODE: PureVideoMode[] = ["head", "torso", "leg"]
 export const BoxSpinner = (props: BoxSpinnerProps) => {
 	const [x, setX] = useState<number>(0)
-	const { width, height } = useWindowSize()
+	const { width } = useWindowSize()
 
 	const [targetX, setTargetX] = useState<number>(0)
 	const [spinning, setSpinning] = useState<boolean>(false)
-	const [ready, setReady] = useState<boolean>(false)
-	const [socket, setSocket] = useState<any>()
+	const [connectText, setConnectText] = useState<string>("Not connected.")
 	const [buttonPressed, setButtonPressed] = useState<boolean>(false)
 	const resolvedWidth = width ?? 1920
 
@@ -41,12 +25,15 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 		let arr = []
 		for (let i = 0; i < props.boxCount; i++) {
 			arr.push(
-				<img src={`videos/${props.videoMode}/frames/${i + 1}.png`} />
+				<img
+					alt="Spinner"
+					src={`videos/${props.videoMode}/frames/${i + 1}.png`}
+				/>
 			)
 		}
 
 		return arr
-	}, [])
+	}, [props.boxCount, props.videoMode])
 
 	const tickInterval = 200
 	useEffect(() => {
@@ -61,6 +48,10 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 
 		return () => clearInterval(timerId)
 	})
+	const startSpinner = useCallback(() => {
+		setTargetX(targetX + getRandInt(5, Math.min(12, props.boxCount)))
+		setSpinning(true)
+	}, [targetX, props.boxCount])
 
 	const [debouncedReadyForSpin] = useDebounce(buttonPressed, 500)
 	useEffect(() => {
@@ -69,34 +60,28 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 			setButtonPressed(false)
 			startSpinner()
 		}
-	}, [debouncedReadyForSpin])
-
-	const startSpinner = useCallback(() => {
-		setTargetX(targetX + getRandInt(5, Math.min(12, props.boxCount)))
-		setSpinning(true)
-	}, [props.videoMode, targetX])
-
-	const test = useMemo(() => targetX, [targetX])
-
-	const testCallback = (num: number) => {
-		if (NUM_TO_VIDEO_MODE[num] !== props.videoMode) {
-			return
-		}
-		setButtonPressed(true)
-	}
+	}, [debouncedReadyForSpin, startSpinner])
 
 	useEffect(() => {
 		const socket = io(`ws://${process.env.REACT_APP_WS}:5000`, {
 			withCredentials: false,
+			auth: undefined,
 		})
-		socket.on("connect", () =>
-			console.log("Websocket connection established.")
-		)
-		socket.on("input_event", testCallback)
-	}, [])
+		socket.on("connect", () => setConnectText("Connection Succeeded"))
+		socket.on("connect_failed", () => {
+			setConnectText("Connection failed")
+		})
+		socket.on("input_event", (num: number) => {
+			if (NUM_TO_VIDEO_MODE[num] !== props.videoMode) {
+				return
+			}
+			setButtonPressed(true)
+		})
+	}, [props.videoMode])
 
 	return (
 		<div>
+			<p>{connectText}</p>
 			<div>
 				{boxes.map((box, i) => (
 					<div
@@ -131,7 +116,6 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 					width="100vw"
 					height="100vh"
 					loop
-					on
 					style={{
 						zIndex: 1,
 					}}

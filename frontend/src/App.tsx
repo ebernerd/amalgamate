@@ -2,7 +2,6 @@ import "./App.scss"
 import { useContext } from "react"
 import { PureVideoMode, VideoModeContext } from "./contexts/VideoMode"
 import { VideoModeSelector } from "./components/VideoModeSelector"
-import { VideoController } from "./components/VideoController"
 import { BoxSpinner } from "./components/BoxSpinner"
 
 const VIDEO_COUNTS: Record<PureVideoMode, number> = {

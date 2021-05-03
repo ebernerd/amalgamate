@@ -2,6 +2,7 @@ import { useContext } from "react"
 import { VideoModeContext } from "../contexts/VideoMode"
 
 export const VideoModeSelector = () => {
+	// eslint-disable-next-line
 	const [_, setValue] = useContext(VideoModeContext)
 	if (!setValue) {
 		return <></>
