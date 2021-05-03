@@ -34,7 +34,7 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 		}
 
 		return arr
-	}, [props.boxCount, props.videoMode])
+	}, [])
 
 	const tickInterval = 200
 	useEffect(() => {
@@ -63,22 +63,7 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 		}
 	}, [debouncedReadyForSpin, startSpinner])
 
-	useEffect(() => {
-		const socket = io(`ws://${process.env.REACT_APP_WS}:5000`, {
-			withCredentials: false,
-			auth: undefined,
-		})
-		socket.on("connect", () => setConnectText("Connection Succeeded"))
-		socket.on("connect_failed", () => {
-			setConnectText("Connection failed")
-		})
-		socket.on("input_event", (num: number) => {
-			if (NUM_TO_VIDEO_MODE[num] !== props.videoMode) {
-				return
-			}
-			setButtonPressed(true)
-		})
-	}, [props.videoMode])
+	useEffect(() => {}, [props.videoMode])
 
 	return (
 		<div>
