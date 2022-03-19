@@ -8,11 +8,17 @@ import { useDebounce } from "use-debounce"
 export interface BoxSpinnerProps {
 	boxCount: number
 	videoMode: PureVideoMode
-	isPi: boolean
 }
+
+const VIDEOS_DIR = `${process.env.PUBLIC_URL}/videos`
 
 const NUM_TO_VIDEO_MODE: PureVideoMode[] = ["head", "torso", "leg"]
 export const BoxSpinner = (props: BoxSpinnerProps) => {
+	const getFrameUrl = (index: number) =>
+		`${VIDEOS_DIR}/${props.videoMode}/frames/${index}.png`
+	const getVideoUrl = (index: number) =>
+		`${VIDEOS_DIR}/${props.videoMode}/${index}.mp4`
+
 	const [x, setX] = useState<number>(0)
 	const { width } = useWindowSize()
 
@@ -21,22 +27,9 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 	const [buttonPressed, setButtonPressed] = useState<boolean>(false)
 	const resolvedWidth = width ?? 1920
 
-	const boxes: ReactNode[] = useMemo(() => {
-		console.log(props.videoMode)
-		let arr = []
-		for (let i = 0; i < props.boxCount; i++) {
-			arr.push(
-				<img
-					alt="Spinner"
-					src={`https://storage.googleapis.com/amalgamate-videos/${
-						props.videoMode
-					}/frames/${i + 1}.png`}
-				/>
-			)
-		}
-
-		return arr
-	}, [props.boxCount, props.videoMode])
+	const boxes = Array(props.boxCount).map((_, i) => (
+		<img alt="Spinner" src={getFrameUrl(i)} />
+	))
 
 	const tickInterval = 200
 	useEffect(() => {
@@ -67,12 +60,9 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 	}, [debouncedReadyForSpin, startSpinner])
 
 	useEffect(() => {
-		const socket = io(
-			`ws://${props.isPi ? "127.0.0.1" : process.env.REACT_APP_WS}:5000`,
-			{
-				withCredentials: false,
-			}
-		)
+		const socket = io(`ws://${process.env.REACT_APP_WS}:5000`, {
+			withCredentials: false,
+		})
 		socket.on("connect", () =>
 			console.log("Websocket connection established.")
 		)
@@ -82,7 +72,7 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 			}
 			setButtonPressed(true)
 		})
-	}, [props.videoMode, props.isPi])
+	}, [props.videoMode])
 
 	return (
 		<div className="videoHolder">
@@ -113,9 +103,7 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 					</div>
 				))}
 				<ReactPlayer
-					url={`https://storage.googleapis.com/amalgamate-videos/${
-						props.videoMode
-					}/${(targetX % props.boxCount) + 1}.mp4`}
+					url={getVideoUrl((targetX % props.boxCount) + 1)}
 					playing={true}
 					width="100vw"
 					height="100vh"

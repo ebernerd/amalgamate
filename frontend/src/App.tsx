@@ -11,23 +11,11 @@ const VIDEO_COUNTS: Record<PureVideoMode, number> = {
 }
 
 const App = () => {
-	//	Show the video mode selector if there is not one selected
-	const [isPi, setIsPi] = useState<boolean>(false)
-
 	const [videoMode] = useContext(VideoModeContext)
 	return videoMode === undefined ? (
-		<>
-			<VideoModeSelector />
-			<button onClick={() => setIsPi(!isPi)}>
-				Is in Pi view? {isPi ? "Yes" : "No"}
-			</button>
-		</>
+		<VideoModeSelector />
 	) : (
-		<BoxSpinner
-			isPi={isPi}
-			boxCount={VIDEO_COUNTS[videoMode]}
-			videoMode={videoMode}
-		/>
+		<BoxSpinner boxCount={VIDEO_COUNTS[videoMode]} videoMode={videoMode} />
 	)
 }
 
