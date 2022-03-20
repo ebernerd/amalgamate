@@ -22,7 +22,6 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 
 	const getFrameUrl = (index: number) =>
 		`${VIDEOS_DIR}/${props.videoMode}/frames/${index}.png`
-	console.log(getFrameUrl(1))
 	const getVideoUrl = (index: number) =>
 		`${VIDEOS_DIR}/${props.videoMode}/${index}.mp4`
 
@@ -48,7 +47,12 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 	//	This callback updates the target clip & initiates the spinning animation
 	const startSpinner = useCallback(() => {
 		if (!isSpinning) {
-			setTargetClipIndex(getRandInt(0, VIDEO_COUNTS[props.videoMode] - 1))
+			const newTargetIndex = getRandInt(
+				0,
+				VIDEO_COUNTS[props.videoMode] - 1
+			)
+			setTargetClipIndex(newTargetIndex)
+			console.log(`Target clip index: ${newTargetIndex}`)
 			setIsSpinning(true)
 		}
 	}, [targetClipIndex, boxCount, isSpinning])
@@ -104,7 +108,7 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 				) : null}
 				<ReactPlayer
 					url={getVideoUrl((targetClipIndex % boxCount) + 1)}
-					playing={true}
+					playing={!isSpinning}
 					width="100vw"
 					height="100vh"
 					loop

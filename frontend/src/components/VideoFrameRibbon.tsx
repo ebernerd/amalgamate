@@ -24,32 +24,31 @@ export const VideoFrameRibbon: FC<VideoFrameRibbonProps> = (props) => {
 		setTimeout(() => onSpinComplete(), animationDuration * 1000)
 	}, [])
 
-	const frameElements = useMemo(
-		() =>
-			Array(numberOfElements.current)
-				.fill("")
-				.map((_, i) => (
-					<VideoFrame
-						key={i}
-						index={getRandInt(0, VIDEO_COUNTS[videoMode] - 1)}
-						videoMode={videoMode}
-						xPos={i * boxWidth}
-						boxWidth={boxWidth}
-					/>
-				)),
-		[]
-	)
-
-	//	Append the target frame's image to the list
-	frameElements.push(
-		<VideoFrame
-			key={"final-frame"}
-			index={targetIndex}
-			xPos={frameElements.length * boxWidth}
-			videoMode={videoMode}
-			boxWidth={boxWidth}
-		/>
-	)
+	const frameElements = useMemo(() => {
+		const els = Array(numberOfElements.current)
+			.fill("")
+			.map((_, i) => (
+				<VideoFrame
+					key={i}
+					index={getRandInt(0, VIDEO_COUNTS[videoMode] - 1)}
+					videoMode={videoMode}
+					xPos={i * boxWidth}
+					boxWidth={boxWidth}
+				/>
+			))
+		//	Append the target frame's image to the list
+		console.log(`Final frame index: ${targetIndex}`)
+		els.push(
+			<VideoFrame
+				key={"final-frame"}
+				index={targetIndex}
+				xPos={els.length * boxWidth}
+				videoMode={videoMode}
+				boxWidth={boxWidth}
+			/>
+		)
+		return els
+	}, [targetIndex])
 
 	const ribbonStyle: HTMLAttributes<HTMLDivElement>["style"] = {
 		transitionDuration: `${animationDuration}s`,
