@@ -5,6 +5,12 @@ import ReactPlayer from "react-player"
 import { PureVideoMode } from "../contexts/VideoMode"
 import io from "socket.io-client"
 import { useDebounce } from "use-debounce"
+import { useInterval } from "../hooks/useInterval"
+
+const DEBUG_DISABLE_SOCKET = true
+
+const ANIMATION_SPEED_MS = 450
+
 export interface BoxSpinnerProps {
 	boxCount: number
 	videoMode: PureVideoMode
@@ -14,65 +20,103 @@ const VIDEOS_DIR = `${process.env.PUBLIC_URL}/videos`
 
 const NUM_TO_VIDEO_MODE: PureVideoMode[] = ["head", "torso", "leg"]
 export const BoxSpinner = (props: BoxSpinnerProps) => {
+	const { boxCount } = props
+
 	const getFrameUrl = (index: number) =>
 		`${VIDEOS_DIR}/${props.videoMode}/frames/${index}.png`
+	console.log(getFrameUrl(1))
 	const getVideoUrl = (index: number) =>
 		`${VIDEOS_DIR}/${props.videoMode}/${index}.mp4`
 
-	const [x, setX] = useState<number>(0)
 	const { width } = useWindowSize()
+	const resolvedWidth = width ?? 1920 //	Provides 1920 as a default value
 
-	const [targetX, setTargetX] = useState<number>(0)
-	const [spinning, setSpinning] = useState<boolean>(false)
-	const [buttonPressed, setButtonPressed] = useState<boolean>(false)
-	const resolvedWidth = width ?? 1920
+	//	Holds the index of the currently-playing video clip
+	const [currentClipIndex, setCurrentClipIndex] = useState<number>(0)
 
-	const boxes = Array(props.boxCount).map((_, i) => (
-		<img alt="Spinner" src={getFrameUrl(i)} />
-	))
+	//	Holds the index of the video clip the spin animation should stop at
+	const [targetClipIndex, setTargetClipIndex] = useState<number>(0)
 
-	const tickInterval = 200
-	useEffect(() => {
-		//console.log(x, targetX, test)
-		const timerId = setInterval(() => {
-			if (x < targetX && spinning) {
-				setX(x + 1)
+	const [isSpinning, setIsSpinning] = useState<boolean>(false)
+	const [isButtonPressed, setIsButtonPressed] = useState<boolean>(false)
+
+	const boxes = Array(boxCount * 2)
+		.fill("")
+		.map((_, i) => <img alt="Spinner" src={getFrameUrl(i % boxCount)} />)
+
+	/*	This useEffect is what drives the animation for the most part. Every
+		`tickInterval` ms, the effect checks if the animation should still spin,
+		and if so, updates which frame should be shown on screen. Once the
+		effect runs enough times, it will stop the spinning animation
+	*/
+	useInterval(
+		() => {
+			console.log("Interval")
+			console.log(currentClipIndex, targetClipIndex, isSpinning)
+			if (currentClipIndex < targetClipIndex && isSpinning) {
+				setCurrentClipIndex(currentClipIndex + 1)
 			} else {
-				setSpinning(false)
+				setIsSpinning(false)
 			}
-		}, tickInterval)
+		},
+		isSpinning ? 200 : null
+	)
 
-		return () => clearInterval(timerId)
+	//	This useEffect listens for a debug key press which simulates a message
+	//	from the Pi
+	useEffect(() => {
+		window.addEventListener("keypress", (e) => {
+			if (e.key === "e") {
+				startSpinner()
+			}
+		})
 	})
-	const startSpinner = useCallback(() => {
-		if (!spinning) {
-			setTargetX(targetX + getRandInt(5, Math.min(12, props.boxCount)))
-			setSpinning(true)
-		}
-	}, [targetX, props.boxCount, spinning])
 
-	const [debouncedReadyForSpin] = useDebounce(buttonPressed, 500)
+	//	This callback updates the target clip & initiates the spinning animation
+	const startSpinner = useCallback(() => {
+		if (!isSpinning) {
+			setTargetClipIndex((targetClipIndex + getRandInt(5, 12)) % boxCount)
+			setIsSpinning(true)
+		}
+	}, [targetClipIndex, boxCount, isSpinning])
+
+	/*	The buttons sometimes send a burst of button-press signals at once which
+		would trigger multiple spin animations. Debouncing this variable reduces
+		the changes of a double-spin occurring
+	*/
+	const [debouncedReadyForSpin] = useDebounce(isButtonPressed, 500)
+
+	//	This useEffect listens for a request for a spin and starts the animation
 	useEffect(() => {
 		if (debouncedReadyForSpin) {
-			setButtonPressed(false)
+			setIsButtonPressed(false)
 			startSpinner()
 		}
 	}, [debouncedReadyForSpin, startSpinner])
 
+	//	This effect initiates the connection to the websocket server
 	useEffect(() => {
+		if (DEBUG_DISABLE_SOCKET) {
+			return
+		}
 		const socket = io(`ws://${process.env.REACT_APP_WS}:5000`, {
 			withCredentials: false,
 		})
 		socket.on("connect", () =>
 			console.log("Websocket connection established.")
 		)
-		socket.on("input_event", (num: number) => {
+
+		//	This function checks if the incoming `input_event` message is for
+		//	this instance of the webpage
+		const respondToInputEvent = (num: number) => {
 			if (NUM_TO_VIDEO_MODE[num - 1] !== props.videoMode) {
 				return
 			}
-			setButtonPressed(true)
-		})
-	}, [props.videoMode])
+			setIsButtonPressed(true)
+		}
+
+		socket.on("input_event", respondToInputEvent)
+	}, [])
 
 	return (
 		<div className="videoHolder">
@@ -84,26 +128,29 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 						style={{
 							position: "fixed",
 							background: "white",
+							transitionProperty: "all",
+							transitionDuration: `${ANIMATION_SPEED_MS / 1000}s`,
+							transitionTimingFunction: "ease-in-out",
 							display:
-								spinning &&
-								Math.abs((x % props.boxCount) - i) <= 2
+								isSpinning &&
+								Math.abs((currentClipIndex % boxCount) - i) <= 2
 									? "block"
 									: "none",
 							left:
-								x % props.boxCount === i
+								currentClipIndex % boxCount === i
 									? 0
-									: x % props.boxCount === i + 1
+									: currentClipIndex % boxCount === i + 1
 									? -resolvedWidth
 									: resolvedWidth,
 
-							zIndex: props.boxCount - i + 100,
+							zIndex: boxCount - i + 1000,
 						}}
 					>
 						{box}
 					</div>
 				))}
 				<ReactPlayer
-					url={getVideoUrl((targetX % props.boxCount) + 1)}
+					url={getVideoUrl((targetClipIndex % boxCount) + 1)}
 					playing={true}
 					width="100vw"
 					height="100vh"

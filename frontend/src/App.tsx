@@ -5,7 +5,7 @@ import { VideoModeSelector } from "./components/VideoModeSelector"
 import { BoxSpinner } from "./components/BoxSpinner"
 
 const VIDEO_COUNTS: Record<PureVideoMode, number> = {
-	head: 25,
+	head: 19,
 	torso: 39,
 	leg: 35,
 }
