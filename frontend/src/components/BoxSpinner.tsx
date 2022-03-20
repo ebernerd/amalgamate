@@ -6,17 +6,15 @@ import { PureVideoMode } from "../contexts/VideoMode"
 import io from "socket.io-client"
 import { useDebounce } from "use-debounce"
 import { useInterval } from "../hooks/useInterval"
+import { VIDEOS_DIR, VIDEO_COUNTS } from "../utils/misc"
+import { VideoFrameRibbon } from "./VideoFrameRibbon"
 
 const DEBUG_DISABLE_SOCKET = true
-
-const ANIMATION_SPEED_MS = 450
 
 export interface BoxSpinnerProps {
 	boxCount: number
 	videoMode: PureVideoMode
 }
-
-const VIDEOS_DIR = `${process.env.PUBLIC_URL}/videos`
 
 const NUM_TO_VIDEO_MODE: PureVideoMode[] = ["head", "torso", "leg"]
 export const BoxSpinner = (props: BoxSpinnerProps) => {
@@ -28,39 +26,14 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 	const getVideoUrl = (index: number) =>
 		`${VIDEOS_DIR}/${props.videoMode}/${index}.mp4`
 
-	const { width } = useWindowSize()
-	const resolvedWidth = width ?? 1920 //	Provides 1920 as a default value
-
-	//	Holds the index of the currently-playing video clip
-	const [currentClipIndex, setCurrentClipIndex] = useState<number>(0)
+	const { width: rawScreenWidth } = useWindowSize()
+	const screenWidth = rawScreenWidth ?? 1920 //	Provides 1920 as a default value
 
 	//	Holds the index of the video clip the spin animation should stop at
 	const [targetClipIndex, setTargetClipIndex] = useState<number>(0)
 
 	const [isSpinning, setIsSpinning] = useState<boolean>(false)
 	const [isButtonPressed, setIsButtonPressed] = useState<boolean>(false)
-
-	const boxes = Array(boxCount * 2)
-		.fill("")
-		.map((_, i) => <img alt="Spinner" src={getFrameUrl(i % boxCount)} />)
-
-	/*	This useEffect is what drives the animation for the most part. Every
-		`tickInterval` ms, the effect checks if the animation should still spin,
-		and if so, updates which frame should be shown on screen. Once the
-		effect runs enough times, it will stop the spinning animation
-	*/
-	useInterval(
-		() => {
-			console.log("Interval")
-			console.log(currentClipIndex, targetClipIndex, isSpinning)
-			if (currentClipIndex < targetClipIndex && isSpinning) {
-				setCurrentClipIndex(currentClipIndex + 1)
-			} else {
-				setIsSpinning(false)
-			}
-		},
-		isSpinning ? 200 : null
-	)
 
 	//	This useEffect listens for a debug key press which simulates a message
 	//	from the Pi
@@ -75,7 +48,7 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 	//	This callback updates the target clip & initiates the spinning animation
 	const startSpinner = useCallback(() => {
 		if (!isSpinning) {
-			setTargetClipIndex((targetClipIndex + getRandInt(5, 12)) % boxCount)
+			setTargetClipIndex(getRandInt(0, VIDEO_COUNTS[props.videoMode] - 1))
 			setIsSpinning(true)
 		}
 	}, [targetClipIndex, boxCount, isSpinning])
@@ -121,34 +94,14 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 	return (
 		<div className="videoHolder">
 			<div>
-				{boxes.map((box, i) => (
-					<div
-						key={i}
-						className="box"
-						style={{
-							position: "fixed",
-							background: "white",
-							transitionProperty: "all",
-							transitionDuration: `${ANIMATION_SPEED_MS / 1000}s`,
-							transitionTimingFunction: "ease-in-out",
-							display:
-								isSpinning &&
-								Math.abs((currentClipIndex % boxCount) - i) <= 2
-									? "block"
-									: "none",
-							left:
-								currentClipIndex % boxCount === i
-									? 0
-									: currentClipIndex % boxCount === i + 1
-									? -resolvedWidth
-									: resolvedWidth,
-
-							zIndex: boxCount - i + 1000,
-						}}
-					>
-						{box}
-					</div>
-				))}
+				{isSpinning ? (
+					<VideoFrameRibbon
+						boxWidth={screenWidth}
+						targetIndex={targetClipIndex}
+						videoMode={props.videoMode}
+						onSpinComplete={() => setIsSpinning(false)}
+					/>
+				) : null}
 				<ReactPlayer
 					url={getVideoUrl((targetClipIndex % boxCount) + 1)}
 					playing={true}

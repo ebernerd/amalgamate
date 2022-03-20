@@ -3,12 +3,7 @@ import { useContext, useState } from "react"
 import { PureVideoMode, VideoModeContext } from "./contexts/VideoMode"
 import { VideoModeSelector } from "./components/VideoModeSelector"
 import { BoxSpinner } from "./components/BoxSpinner"
-
-const VIDEO_COUNTS: Record<PureVideoMode, number> = {
-	head: 19,
-	torso: 39,
-	leg: 35,
-}
+import { VIDEO_COUNTS } from "./utils/misc"
 
 const App = () => {
 	const [videoMode] = useContext(VideoModeContext)
