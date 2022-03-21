@@ -8,13 +8,13 @@ type VideoFrameProps = {
 	index: number
 	videoMode: PureVideoMode
 	xPos: number
-	boxWidth: number
+	zIndex?: number
 }
 
 export const ANIMATION_SPEED = 0.25 //seconds
 
 export const VideoFrame: FC<VideoFrameProps> = (props) => {
-	const { index, videoMode, xPos, boxWidth } = props
+	const { index, videoMode, xPos, zIndex } = props
 
 	const frameImgUrl = `${VIDEOS_DIR}/${videoMode}/frames/${index + 1}.png`
 
@@ -29,7 +29,7 @@ export const VideoFrame: FC<VideoFrameProps> = (props) => {
 		transitionDuration: `${ANIMATION_SPEED}s`,
 		transitionProperty: "all",
 		transitionTimingFunction: "linear",
-		zIndex: 100 + index,
+		zIndex: zIndex ?? 100 + index,
 		width: "100vw",
 		height: "100vh",
 		background: "white",

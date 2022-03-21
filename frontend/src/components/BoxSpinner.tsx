@@ -8,8 +8,9 @@ import { useDebounce } from "use-debounce"
 import { useInterval } from "../hooks/useInterval"
 import { VIDEOS_DIR, VIDEO_COUNTS } from "../utils/misc"
 import { VideoFrameRibbon } from "./VideoFrameRibbon"
+import { VideoFrame } from "./VideoFrame"
 
-const DEBUG_DISABLE_SOCKET = true
+const DEBUG_DISABLE_SOCKET = false
 
 export interface BoxSpinnerProps {
 	boxCount: number
@@ -92,31 +93,46 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 			setIsButtonPressed(true)
 		}
 
-		socket.on("input_event", respondToInputEvent)
+		socket.on("input_event", (num: number) => {
+			respondToInputEvent(num)
+			console.log(num)
+		})
 	}, [])
 
 	return (
 		<div className="videoHolder">
 			<div>
+				{!isSpinning ? (
+					<VideoFrame
+						index={targetClipIndex}
+						xPos={0}
+						videoMode={props.videoMode}
+						zIndex={-1}
+					/>
+				) : null}
 				{isSpinning ? (
 					<VideoFrameRibbon
 						boxWidth={screenWidth}
 						targetIndex={targetClipIndex}
 						videoMode={props.videoMode}
-						onSpinComplete={() => setIsSpinning(false)}
+						onSpinComplete={() => {
+							console.log("done")
+							setIsSpinning(false)
+						}}
 					/>
-				) : null}
-				<ReactPlayer
-					url={getVideoUrl((targetClipIndex % boxCount) + 1)}
-					playing={!isSpinning}
-					width="100vw"
-					height="100vh"
-					loop
-					style={{
-						zIndex: 1,
-					}}
-					volume={0}
-				/>
+				) : (
+					<ReactPlayer
+						url={getVideoUrl((targetClipIndex % boxCount) + 1)}
+						playing={true}
+						width="100vw"
+						height="100vh"
+						loop
+						style={{
+							zIndex: 1,
+						}}
+						volume={0}
+					/>
+				)}
 			</div>
 		</div>
 	)

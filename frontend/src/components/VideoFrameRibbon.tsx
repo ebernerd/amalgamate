@@ -33,7 +33,6 @@ export const VideoFrameRibbon: FC<VideoFrameRibbonProps> = (props) => {
 					index={getRandInt(0, VIDEO_COUNTS[videoMode] - 1)}
 					videoMode={videoMode}
 					xPos={i * boxWidth}
-					boxWidth={boxWidth}
 				/>
 			))
 		//	Append the target frame's image to the list
@@ -44,7 +43,6 @@ export const VideoFrameRibbon: FC<VideoFrameRibbonProps> = (props) => {
 				index={targetIndex}
 				xPos={els.length * boxWidth}
 				videoMode={videoMode}
-				boxWidth={boxWidth}
 			/>
 		)
 		return els
