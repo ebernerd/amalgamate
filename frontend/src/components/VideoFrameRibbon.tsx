@@ -8,13 +8,16 @@ export type VideoFrameRibbonProps = {
 	targetIndex: number
 	boxWidth: number
 	videoMode: PureVideoMode
+	width: number
+	height: number
 
 	onSpinComplete(): void
 }
 
 const SPEED_PER_FRAME = 0.1 // seconds
 export const VideoFrameRibbon: FC<VideoFrameRibbonProps> = (props) => {
-	const { boxWidth, targetIndex, videoMode, onSpinComplete } = props
+	const { boxWidth, targetIndex, videoMode, onSpinComplete, width, height } =
+		props
 	const [targetX, setTargetX] = useState<number>(0)
 	const numberOfElements = useRef(getRandInt(10, 15) * 2)
 	const animationDuration = numberOfElements.current * SPEED_PER_FRAME
@@ -24,14 +27,20 @@ export const VideoFrameRibbon: FC<VideoFrameRibbonProps> = (props) => {
 		setTimeout(() => onSpinComplete(), animationDuration * 1000)
 	}, [])
 
+	const commonVFProps = {
+		width,
+		height,
+		videoMode,
+	}
+
 	const frameElements = useMemo(() => {
 		const els = Array(numberOfElements.current)
 			.fill("")
 			.map((_, i) => (
 				<VideoFrame
+					{...commonVFProps}
 					key={i}
 					index={getRandInt(0, VIDEO_COUNTS[videoMode] - 1)}
-					videoMode={videoMode}
 					xPos={i * boxWidth}
 				/>
 			))
@@ -39,10 +48,10 @@ export const VideoFrameRibbon: FC<VideoFrameRibbonProps> = (props) => {
 		console.log(`Final frame index: ${targetIndex}`)
 		els.push(
 			<VideoFrame
+				{...commonVFProps}
 				key={"final-frame"}
 				index={targetIndex}
 				xPos={els.length * boxWidth}
-				videoMode={videoMode}
 			/>
 		)
 		return els

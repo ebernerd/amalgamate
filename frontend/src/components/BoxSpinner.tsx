@@ -26,8 +26,9 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 	const getVideoUrl = (index: number) =>
 		`${VIDEOS_DIR}/${props.videoMode}/${index}.mp4`
 
-	const { width: rawScreenWidth } = useWindowSize()
-	const screenWidth = rawScreenWidth ?? 1920 //	Provides 1920 as a default value
+	const rawScreenSize = useWindowSize()
+	const screenWidth = rawScreenSize.width ?? 1920
+	const screenHeight = rawScreenSize.height ?? 1080
 
 	//	Holds the index of the video clip the spin animation should stop at
 	const [targetClipIndex, setTargetClipIndex] = useState<number>(0)
@@ -99,19 +100,25 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 		})
 	}, [])
 
+	const commonVFProps = {
+		videoMode: props.videoMode,
+		width: screenWidth,
+		height: screenHeight,
+	}
+
 	return (
 		<div className="videoHolder">
 			<div>
-				{!isSpinning ? (
-					<VideoFrame
-						index={targetClipIndex}
-						xPos={0}
-						videoMode={props.videoMode}
-						zIndex={-1}
-					/>
-				) : null}
+				<VideoFrame
+					{...commonVFProps}
+					index={targetClipIndex}
+					xPos={0}
+					zIndex={-1}
+				/>
+
 				{isSpinning ? (
 					<VideoFrameRibbon
+						{...commonVFProps}
 						boxWidth={screenWidth}
 						targetIndex={targetClipIndex}
 						videoMode={props.videoMode}
@@ -121,17 +128,29 @@ export const BoxSpinner = (props: BoxSpinnerProps) => {
 						}}
 					/>
 				) : (
-					<ReactPlayer
-						url={getVideoUrl((targetClipIndex % boxCount) + 1)}
-						playing={true}
-						width="100vw"
-						height="100vh"
-						loop
+					<div
 						style={{
-							zIndex: 1,
+							display: "flex",
+							flexDirection: "column",
+							justifyContent: "center",
+							alignItems: "center",
+
+							width: "100vw",
+							height: "100vh",
 						}}
-						volume={0}
-					/>
+					>
+						<ReactPlayer
+							url={getVideoUrl((targetClipIndex % boxCount) + 1)}
+							playing={true}
+							width={screenWidth}
+							height="100vh"
+							loop
+							style={{
+								zIndex: 1,
+							}}
+							volume={0}
+						/>
+					</div>
 				)}
 			</div>
 		</div>
