@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "es6-tween": "^5.5.11",
-		"rc-tween-one": "^2.7.3",
+    "lodash": "^4.17.21",
+    "rc-tween-one": "^2.7.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-player": "^2.9.0",
@@ -19,6 +20,7 @@
     "use-debounce": "^6.0.1"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.200",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.0.0",

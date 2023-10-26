@@ -45,14 +45,16 @@ export const VideoFrame: FC<VideoFrameProps> = (props) => {
 				src={frameImgUrl}
 				alt={`Frame ${index}`}
 				width={
-					videoMode === "leg"
+					/*videoMode === "leg"
 						? height - legSizeOffset * (height / 1080)
-						: width
+						: width*/
+					"100%"
 				}
 				height={
-					videoMode === "leg"
+					/*videoMode === "leg"
 						? width - legSizeOffset * (width / 1920)
-						: "auto"
+						: "auto"*/
+					"100%"
 				}
 			/>
 		</div>

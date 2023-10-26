@@ -10,7 +10,7 @@ import { VIDEOS_DIR, VIDEO_COUNTS } from "../utils/misc"
 import { VideoFrameRibbon } from "./VideoFrameRibbon"
 import { VideoFrame } from "./VideoFrame"
 
-const DEBUG_DISABLE_SOCKET = false
+const DEBUG_DISABLE_SOCKET = import.meta.env.DEBUG_DISABLE_SOCKET ?? false
 
 export interface BoxSpinnerProps {
 	boxCount: number
